@@ -112,6 +112,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         vertical-align: middle;}
       .duration {float: left;}
       .distance {float: right;}
+      paper-fab
+      {
+        position: fixed;
+        bottom: 2vh;
+        right: 2vh;
+        --paper-fab-background: var(--primary-color);
+        
+      }
     </style>
 
     <div class="Page-container" id="section1">
@@ -149,15 +157,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div class="trip-detail">
           <div class="duration">
             <iron-icon icon="device:access-alarm"></iron-icon>
-            <span>[[_duration]] mins</span>
+            <span>[[_duration]]</span>
           </div>
           <div class="distance">
             <iron-icon icon="maps:place"></iron-icon>
-            <span>[[_distance]] kms</span>
+            <span>[[_distance]]</span>
           </div>
         </div>
  
-      <paper-fab icon="favorite"></paper-fab>
+      <paper-fab icon="maps:navigation" raised on-tap="fabClicked"></paper-fab>
     </div>
 
   </template>
@@ -262,6 +270,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: "error"
           });
         }
+      },
+      
+      fabClicked: function(){
+        var origin = new google.maps.LatLng(this._currLat, this._currLong);
+        var destination = this._end;
+        var DrivingOptions = {departureTime: new Date(Date.now() + 300), trafficModel: 'bestguess'}
+        var service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix(
+          {
+            origins: [origin],
+            destinations: [destination],
+            travelMode: 'DRIVING',
+            drivingOptions: DrivingOptions,
+            avoidHighways: false,
+            avoidTolls: false,
+          }, function callback(response, status) {
+            if(status == 'OK'){
+
+              this._distance = response.rows[0].elements[0].distance.text;
+              this._duration = response.rows[0].elements[0].duration.text;
+            }else{
+              sweetAlert("Failed to retrieve your trip information from Google server");
+            }
+            
+        }.bind(this));
+        
+        
       }
         
     });
