@@ -220,12 +220,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                           disabled="[[app.isOffline]]" raised>{{localize('sign-in')}}</paper-button>
           </a>
 
-          <div hidden$="[[!app.isSignedIn]]">
-            <a href="{{app.baseUrl}}contact" tabindex="-1">
-              <paper-icon-button class="avatar" id="avatarToolbar" icon="face" >      
-              </paper-icon-button>
-            </a>
-          </div>
+          <div hidden$="[[!app.isSignedIn]]">[[app.userProfile.displayName]]</div>
 
         </app-toolbar>
 

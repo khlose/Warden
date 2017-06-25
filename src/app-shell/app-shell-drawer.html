@@ -118,6 +118,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 30%;
         height: 30%;
       }
+      .quote{
+        text-align: center;
+        width: inherit;
+      }
 
     </style>
 
@@ -129,6 +133,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <iron-icon id="icon-header" class="Drawer-headerLogo" icon="header:taxi"></iron-icon>
           </div>
         </div>
+        <h2 class="quote">Help us keep you safe.</h2>
 
         <div class="Drawer-widget">
           <iron-selector class="Navigation" selected="[[page]]" attr-for-selected="name" role="navigation">
@@ -149,8 +154,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
 
             <a class="Navigation-link" name="contact-us" href="/contact-us">
-              <iron-icon class="Navigation-icon" icon="dashboard"></iron-icon>
-              <span class="Navigation-text">{{localize('dashboard')}}</span>
+              <iron-icon class="Navigation-icon" icon="mail"></iron-icon>
+              <span class="Navigation-text">{{localize('contact-us')}}</span>
             </a>
 
           </iron-selector>

@@ -225,17 +225,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </paper-button>
         </div>
 
-        <div class="SignIn SignIn--facebook">
-          <paper-fab class="SignIn-fab SignIn-fab--facebook" icon="sign-in:facebook"
-                     title="{{localize('sign-in-facebook')}}"
-                     hidden$="{{!app.isLaptopWide}}"
-                     on-tap="_onFacebookButtonTap"></paper-fab>
-          <paper-button class="Button Button--facebook" raised on-tap="_onFacebookButtonTap">
-            <iron-icon class="Button-icon" icon="sign-in:facebook"></iron-icon>
-            {{localize('sign-in-facebook')}}
-          </paper-button>
-        </div>
-
         <div class="SignIn SignIn--email">
           <paper-fab class="SignIn-fab SignIn-fab--email" icon="sign-in:mail"
                      title="{{localize('sign-in-email')}}"

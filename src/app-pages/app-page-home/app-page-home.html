@@ -26,6 +26,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
 <link rel="stylesheet" href="../../../bower_components/sweetalert/dist/sweetalert.css">
+<link rel="import" href="../../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../../bower_components/simple-timer/simple-timer.html">
+<link rel="import" href="../../../bower_components/font-roboto/roboto.html"
 <link rel="import" href="app-icons-home.html">
 
 <dom-module id="app-page-home">
@@ -116,19 +119,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       {
         position: fixed;
         bottom: 2vh;
-        right: 2vh;
+        right: 1vh;
         --paper-fab-background: var(--primary-color);
         
       }
+      .header
+      {
+        margin-top: 2vh;
+        margin-left: 4vh;
+        margin-bottom: -3vh;
+      }
+      .tooltips{
+        text-align: center;
+        position: fixed;
+        width: 100%;
+        left: -8vh;
+        bottom: 3vh;
+        color: var(--paper-grey-600);
+        font-family: 'Roboto', 'Noto', sans-serif;
+        
+      }
+      .disabledbutton {
+    pointer-events: none;
+    opacity: 0.4;
+}
     </style>
 
-    <div class="Page-container" id="section1">
+    <div class="" id="section1" >
       <paper-card class="search-card" elevation="2">
-        
+        <h1 class="header"></h1>
         <paper-icon-item class="paper-item-search">
           <iron-icon class="search-icon"  icon="search" item-icon></iron-icon>
           <paper-input class="address-slot" id="startAddress" label="Start address" value="{{_start}}"></paper-input>
-          <paper-icon-button class ="current-icon" raised on-tap="getlocation" icon="maps:my-location"></paper-icon-button>
+          <paper-icon-button class ="current-icon" id="currIcon" raised on-tap="getlocation" icon="maps:my-location"></paper-icon-button>
         </paper-icon-item>
           
         <paper-icon-item class="paper-item-search">
@@ -155,25 +178,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </google-map-directions>
       </div>
       <div class="trip-detail">
-          <div class="duration">
-            <iron-icon icon="device:access-alarm"></iron-icon>
-            <span>[[_duration]]</span>
-          </div>
-          <div class="distance">
-            <iron-icon icon="maps:place"></iron-icon>
-            <span>[[_distance]]</span>
-          </div>
+        <div class="duration">
+          <iron-icon icon="device:access-alarm"></iron-icon>
+          <span>[[_duration]]</span>
         </div>
- 
-      <paper-fab icon="maps:navigation" raised on-tap="fabClicked"></paper-fab>
-    </div>
+        <div class="distance">
+          <iron-icon icon="maps:place"></iron-icon>
+          <span>[[_distance]]</span>
+        </div>
+      </div>
+      
+      <paper-fab icon="maps:navigation" on-tap="fabClicked" hidden="{{_isStarted}}"></paper-fab>
+      <paper-fab icon="cancel" on-tap="cancelClicked" hidden="{{!_isStarted}}"></paper-fab>
 
+      <div class=tooltips>
+        <p> Tap the button when you're ready.</p>
+      </div>
+    </div>
+    
+    <simple-timer id="timer" hidden=true></simple-timer>
+    <paper-button on-tap="start" hidden=true>Start</paper-button>
   </template>
 
   <script>
 
     Polymer({
       ready: function(){ 
+        this.$.timer.startTime = 1;
+        console.log(this.$.timer.startTime);
+        this._secondRemain = this.$.timer.currentTime;
       },
       is: 'app-page-home',
       properties: {
@@ -182,8 +215,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: false,
           observer: '_activeChanged'
         },
+        _isStarted:{
+          type:Boolean,
+          value: false
+        },
 
         app: Object,
+        mainClass: {
+          type:String,
+          value: "Page-container"
+        },
 
         _isLocalesLoaded: {
           type: Boolean,
@@ -213,6 +254,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Number,
           value:0
         },
+        _durationSecond:{
+          type: Number,
+          value:0
+        },
+        _secondRemain:{
+          type: Number,
+          value:0,
+          observer:'_timeTick'
+        }
         
       },
             
@@ -240,10 +290,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         //this.style.display = 'block';
         this.set('app.pageTitle', this.localize('home'));
       },
-      testButton:function(){
-        console.log(this._start);
-      },
-      
+
       getlocation: function(){
         if(navigator.geolocation){
           navigator.geolocation.getCurrentPosition(function(position){
@@ -273,6 +320,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
       
       fabClicked: function(){
+        console.log('CLICKED');
+        
+
+                
         var origin = new google.maps.LatLng(this._currLat, this._currLong);
         var destination = this._end;
         var DrivingOptions = {departureTime: new Date(Date.now() + 300), trafficModel: 'bestguess'}
@@ -288,18 +339,88 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }, function callback(response, status) {
             if(status == 'OK'){
 
-              this._distance = response.rows[0].elements[0].distance.text;
-              this._duration = response.rows[0].elements[0].duration.text;
+              try{
+                this._distance = response.rows[0].elements[0].distance.text;
+                this._duration = response.rows[0].elements[0].duration.text;
+                this._durationSecond =response.rows[0].elements[0].duration.value;
+              }catch(e){
+                
+                this._distance =  0;
+                this._duration = 0;
+            }
+
             }else{
               sweetAlert("Failed to retrieve your trip information from Google server");
             }
         }.bind(this));
         
+                swal({
+          title: "Starting the trip?",
+          text: "For your own safety, you won't be able to cancel this trip tracking until it's over. This trip will take "+this._duration+" to complete.",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#B2DFDB",
+          confirmButtonText: "Yes, Let's go!",
+          closeOnConfirm: false
+        },
+             function(){
+          swal("Started!", "The tracking page will become available again once this trip is over.", "success");
+          this.$.startAddress.disabled = true;
+          this.$.currIcon.disabled = true;
+          this.$.startAddress.disabled = true;
+          this.$.endAddress.disabled = true;
+          this._isStarted = true;
+          this.$.timer.startTime = this._durationSecond;
+          this.$.timer.start();
+          
+        }.bind(this));
         
+        
+      },
+      cancelClicked: function(){
+        swal({
+          title: "Canceling the trip?",
+          text: "All your record for this trip will be erased",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#DD6B55",
+          confirmButtonText: "Yes, Please!",
+          closeOnConfirm: false
+        },
+             function(){
+          swal("Canceled!", "The tracking page is now available.", "success");
+          this.$.startAddress.disabled = false;
+          this.$.timer.pause();
+          this.$._start = "";
+          this.$._end = "";
+          this.$.currIcon.disabled = false;
+          this.$.startAddress.disabled = false;
+          this.$.endAddress.disabled = false;
+          this._isStarted = false;
+          
+        }.bind(this));
+        
+      },
+      _timeTick: function(){
+        this._duration = secondsToString(this._secondRemain);
+        console.log(this._secondRemain);
+        console.log(this._duration);
       }
         
     });
-    
+    function secondsToString(seconds)
+    {
+      var numyears = Math.floor(seconds / 31536000);
+      var numdays = Math.floor((seconds % 31536000) / 86400); 
+      var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
+      var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+      var numseconds = (((seconds % 31536000) % 86400) % 3600) % 60;
+      var finalString = ""
+      if(numhours != 0) finalString = finalString + numhours+" hrs"
+      if(numminutes != 0) finalString = finalString + numminutes+" mins"
+      if(numseconds != 0) finalString = finalString + numseconds+" secs"
+      return finalString;
+}
   </script>
 
 </dom-module>

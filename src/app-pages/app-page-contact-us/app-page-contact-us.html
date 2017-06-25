@@ -9,7 +9,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-textarea.html">
@@ -21,7 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="app-page-contact-us">
 
   <template>
-
+      
     <style include="pages-shared-styles">
 
       :host {
@@ -55,15 +59,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <div class="Page-container Page-container--center Page-container--fullHeight">
-      <paper-material class="Page-card Page-card--expand" elevation="3">
+
+      <paper-material id="page-card" class="Page-card Page-card--expand" elevation="3">
 
         <h1 class="Page-title" hidden$="{{!app.isTabletWide}}">{{localize('contact-us')}}</h1>
 
         <form class="Form" id="form" is="iron-form" method="get" action="/" on-iron-form-submit="_onFormSubmit">
+          <p>From: {{app.userProfile.displayName}}</p>
           <paper-input class="Input" id="emailInput"
                        name="username" type="text" autocomplete="username"
                        autofocus auto-validate required
-                       value="{{app.userAuthEmail}}"
+                       value="{{app.userProfile.email}}"
                        pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                        label="{{localize('your-email')}}"
                        error-message="{{localize('invalid-email-address')}}"
@@ -76,6 +82,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-button class="Button Button--shadowText" raised>{{localize('send')}}</paper-button>
           </div>
         </form>
+        
+          
+        </div>
 
       </paper-material>
     </div>
@@ -85,7 +94,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
 
     Polymer({
-
+      
       is: 'app-page-contact-us',
 
       properties: {
@@ -94,7 +103,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: false,
           observer: '_activeChanged'
         },
-
+        
+        _userEmail:{type:String},
+            
         app: Object,
 
         _isLocalesLoaded: {
@@ -110,7 +121,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       listeners: {
         'app-resources-loaded': '_onLocalesLoaded'
       },
-
+      
+      add: function(){
+          //var user = firebase.auth();
+          console.log(this.$.query.ref)
+//          this.$.query.ref.push({
+//            name: this.$.inputName.value,
+//            email: this.$.inputEmail.value
+//          });
+//          this.$.inputName.value = null;
+//          this.$.inputEmail.value = null;
+        },
+      
+        
       _activeChanged: function() {
         if (this.active) {
           if (this._isLocalesLoaded) {
