@@ -21,8 +21,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../../../bower_components/iron-icons/device-icons.html">
 <link rel="import" href="../../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
 <link rel="stylesheet" href="../../../bower_components/sweetalert/dist/sweetalert.css">
 <link rel="import" href="app-icons-home.html">
 
@@ -82,47 +84,89 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         z-index: 1;
         padding: 1vh;
       }
+      .paper-item-search{
+        display: inline-block;
+        width: inherit;
+      }
+
+      .current-icon{
+        display: inline-block;
+        width: 10%;
+      }
+      .search-icon{
+        width: 10%;
+        display: inline-block;
+      }
+      .address-slot{
+        width: 75%;
+        display: inline-block
+      }
+      .duration-distance { color: var(--paper-grey-600); }
+
+      .trip-detail 
+      {padding-top: 2vh; 
+        padding-bottom: 1vh;
+        padding-left: 3vh;
+        padding-right: 3vh;
+        font-size: 15; 
+        vertical-align: middle;}
+      .duration {float: left;}
+      .distance {float: right;}
     </style>
 
     <div class="Page-container" id="section1">
       <paper-card class="search-card" elevation="2">
         
-        <paper-icon-item>
-          <iron-icon icon="search" item-icon></iron-icon>
-          <paper-input label="Start address" value="{{start}}"></paper-input>
-          <paper-icon-button raised on-tap="getlocation" icon="maps:my-location"></paper-icon-button>
+        <paper-icon-item class="paper-item-search">
+          <iron-icon class="search-icon"  icon="search" item-icon></iron-icon>
+          <paper-input class="address-slot" id="startAddress" label="Start address" value="{{_start}}"></paper-input>
+          <paper-icon-button class ="current-icon" raised on-tap="getlocation" icon="maps:my-location"></paper-icon-button>
         </paper-icon-item>
           
-        <paper-icon-item>
-          <iron-icon icon="search" item-icon></iron-icon>
-          <paper-input label="End address" value="{{end}}"></paper-input>
+        <paper-icon-item class="paper-item-search">
+          <iron-icon class="search-icon" icon="search" item-icon></iron-icon>
+          <paper-input class="address-slot" id="endAddress" label="End address" value="{{_end}}"></paper-input>
+          <paper-icon-button class ="current-icon" raised on-tap="getlocation" hidden="true"
+                             disabled=true icon="maps:my-location"></paper-icon-button>
         </paper-icon-item>
 
       </paper-card>
       <div class="Map-container" id="sectionMap">
-        <google-map id="main-map" map="{{map}}" latitude="{{_currLat}}" longitude="{{_currLong}}" zoom="13" 
-                    api-key="AIzaSyA8P5CDbf_5xkLRIHDjSJ3k2MXDYH4ffEw" disable-default-ui>
+        <google-map class="map" id="main-map" map="{{map}}" latitude="{{_currLat}}" longitude="{{_currLong}}" 
+                    api-key="AIzaSyA8P5CDbf_5xkLRIHDjSJ3k2MXDYH4ffEw" disable-default-ui draggable=false>
           <google-map-marker id="map-marker"
                            latitude="{{_currLat}}" 
                            longitude="{{_currLong}}"
-                           draggable="false">
+                           >
         </google-map-marker>
         </google-map>
         
-        <google-map-directions id="map-directions" map="{{map}}" start-address="{{start}}"
-                               end-address="{{end}}"
+        <google-map-directions id="map-directions" map="{{map}}" start-address="{{_start}}"
+                               end-address="{{_end}}"
                                api-key="AIzaSyA8P5CDbf_5xkLRIHDjSJ3k2MXDYH4ffEw">
         </google-map-directions>
       </div>
+      <div class="trip-detail">
+          <div class="duration">
+            <iron-icon icon="device:access-alarm"></iron-icon>
+            <span>[[_duration]] mins</span>
+          </div>
+          <div class="distance">
+            <iron-icon icon="maps:place"></iron-icon>
+            <span>[[_distance]] kms</span>
+          </div>
+        </div>
+ 
+      <paper-fab icon="favorite"></paper-fab>
     </div>
 
   </template>
 
   <script>
-    
 
     Polymer({
-
+      ready: function(){ 
+      },
       is: 'app-page-home',
       properties: {
         active: {
@@ -137,23 +181,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: false
         },
-        _currLat:{
+        _currLat: {
           type: Number,
           value: 37.779
         },
-        _currLong:{
+        _currLong: {
           type: Number,
           value: -122.3892
         },
-        _start:{
+        _start: {
           type: String,
+          notify: true,
+          reflectToAttribute: true
         },
         _end:{
           type: String
-        }
+        },
+        _distance:{
+          type: Number,
+          value:0
+        },
+        _duration:{
+          type: Number,
+          value:0
+        },
         
       },
-
+            
       behaviors: [
         AppBehaviors.AppLocalizeBehavior
       ],
@@ -161,7 +215,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       listeners: {
         'app-resources-loaded': '_onLocalesLoaded'
       },
-
       _activeChanged: function() {
         if (this.active) {
           if (this._isLocalesLoaded) {
@@ -179,34 +232,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         //this.style.display = 'block';
         this.set('app.pageTitle', this.localize('home'));
       },
-      reverseGeo: function () {
-        var latlng = new google.maps.LatLng(this._currLat, this._currLong);
-        // This is making the Geocode request
-        var geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ 'latLng': latlng }, function (results, status) {
-          if (status !== google.maps.GeocoderStatus.OK) {
-            sweetAlert("We cannot capture your location","Please try to search manually");
-          }
-        // This is checking to see if the Geoeode Status is OK before proceeding
-          if (status == google.maps.GeocoderStatus.OK) {
-            var address = (results[0].formatted_address);
-            this._start = address;
-            console.log(this._start);
-          }
-        });
+      testButton:function(){
+        console.log(this._start);
       },
+      
       getlocation: function(){
         if(navigator.geolocation){
-          console.log('requesting');
-          this._currLat = "40.5210720";
-          this._currLong = "-75.3766770";
-          //navigator.geolocation.getCurrentPosition(function(position){
-            //console.log('requested')
-            //this._currLat = position.coords.latitude;
-            //this._currLong = position.coords.longitude;
-            //console.log(this._currLat);
-            //console.log(this._currLong);
-          this.reverseGeo();
+          navigator.geolocation.getCurrentPosition(function(position){
+            this._currLat = position.coords.latitude;
+            this._currLong = position.coords.longitude;
+          }.bind(this));
+          var latlng = new google.maps.LatLng(this._currLat, this._currLong);
+          var geocoder = new google.maps.Geocoder();
+          var address = "";
+          geocoder.geocode({ 'latLng': latlng }, function (results, status) {
+            if (status !== google.maps.GeocoderStatus.OK) {
+              sweetAlert("We cannot capture your location","Please try to search manually");
+            }
+            if (status == google.maps.GeocoderStatus.OK) {
+            address = (results[0].formatted_address);
+            this._start = address;
+          }
+          }.bind(this));
         }
         else{
           sweetAlert({
@@ -216,9 +263,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
         }
       }
-
+        
     });
-
+    
   </script>
 
 </dom-module>
