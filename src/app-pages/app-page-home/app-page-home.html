@@ -14,6 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../app-behaviors/app-localize-behavior.html">
 <link rel="import" href="../../app-themes/current-theme/shared-styles/pages-shared-styles.html">
 <link rel="import" href="../../../bower_components/google-map/google-map.html">
+<link rel="import" href="../../../bower_components/google-map/google-map-marker.html">
 <link rel="import" href="../../../bower_components/google-map/google-map-directions.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../../bower_components/paper-card/paper-card.html">
@@ -99,10 +100,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       </paper-card>
       <div class="Map-container" id="sectionMap">
-        <google-map id="main-map" map="{{map}}" latitude="37.779" longitude="-122.3892" zoom="13" 
+        <google-map id="main-map" map="{{map}}" latitude="{{_currLat}}" longitude="{{_currLong}}" zoom="13" 
                     api-key="AIzaSyA8P5CDbf_5xkLRIHDjSJ3k2MXDYH4ffEw" disable-default-ui>
+          <google-map-marker id="map-marker"
+                           latitude="{{_currLat}}" 
+                           longitude="{{_currLong}}"
+                           draggable="false">
+        </google-map-marker>
         </google-map>
-        <google-map-directions id="map-directions" map="{{map}}" start-address="{{coord.start}}"
+        
+        <google-map-directions id="map-directions" map="{{map}}" start-address="{{start}}"
                                end-address="{{end}}"
                                api-key="AIzaSyA8P5CDbf_5xkLRIHDjSJ3k2MXDYH4ffEw">
         </google-map-directions>
@@ -130,7 +137,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: false
         },
-        coord: Object
+        _currLat:{
+          type: Number,
+          value: 37.779
+        },
+        _currLong:{
+          type: Number,
+          value: -122.3892
+        },
+        _start:{
+          type: String,
+        },
+        _end:{
+          type: String
+        }
+        
       },
 
       behaviors: [
@@ -158,14 +179,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         //this.style.display = 'block';
         this.set('app.pageTitle', this.localize('home'));
       },
-      
+      reverseGeo: function () {
+        var latlng = new google.maps.LatLng(this._currLat, this._currLong);
+        // This is making the Geocode request
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ 'latLng': latlng }, function (results, status) {
+          if (status !== google.maps.GeocoderStatus.OK) {
+            sweetAlert("We cannot capture your location","Please try to search manually");
+          }
+        // This is checking to see if the Geoeode Status is OK before proceeding
+          if (status == google.maps.GeocoderStatus.OK) {
+            var address = (results[0].formatted_address);
+            this._start = address;
+            console.log(this._start);
+          }
+        });
+      },
       getlocation: function(){
         if(navigator.geolocation){
-          navigator.geolocation.getCurrentPosition(function(position){
-            this.coord = position.coords;
-            console.log(this.coord.latitude);
-            console.log(this.coord.longitude);
-          });
+          console.log('requesting');
+          this._currLat = "40.5210720";
+          this._currLong = "-75.3766770";
+          //navigator.geolocation.getCurrentPosition(function(position){
+            //console.log('requested')
+            //this._currLat = position.coords.latitude;
+            //this._currLong = position.coords.longitude;
+            //console.log(this._currLat);
+            //console.log(this._currLong);
+          this.reverseGeo();
         }
         else{
           sweetAlert({
