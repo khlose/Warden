@@ -13,6 +13,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../app-behaviors/app-localize-behavior.html">
 <link rel="import" href="../app-pages/app-pages.html">
 <link rel="import" href="../app-themes/current-theme/shared-styles/components-shared-styles.html">
@@ -63,41 +65,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
         z-index: 10;
       }
-/*
-      .Header.home {
-        background-image: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDABsSFBcUERsXFhceHBsgKEIrKCUlKFE6PTBCYFVlZF9VXVtqeJmBanGQc1tdhbWGkJ6jq62rZ4C8ybqmx5moq6T/2wBDARweHigjKE4rK06kbl1upKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKT/wgARCAAGAAoDAREAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAgT/xAAVAQEBAAAAAAAAAAAAAAAAAAADBP/aAAwDAQACEAMQAAABFM9pJ//EABcQAQADAAAAAAAAAAAAAAAAAAABAhH/2gAIAQEAAQUCrDH/xAAUEQEAAAAAAAAAAAAAAAAAAAAQ/9oACAEDAQE/AT//xAAVEQEBAAAAAAAAAAAAAAAAAAAAEf/aAAgBAgEBPwFX/8QAFBABAAAAAAAAAAAAAAAAAAAAEP/aAAgBAQAGPwI//8QAFhABAQEAAAAAAAAAAAAAAAAAACEB/9oACAEBAAE/IbMh/9oADAMBAAIAAwAAABCj/8QAFhEBAQEAAAAAAAAAAAAAAAAAAQAR/9oACAEDAQE/EF1gv//EABYRAQEBAAAAAAAAAAAAAAAAAAEAIf/aAAgBAgEBPxBwmf/EABYQAQEBAAAAAAAAAAAAAAAAACEAQf/aAAgBAQABPxAcBy//2Q==');
-        background-position: center top;
-        background-size: cover;
-        height: 100vh;
-        min-height: 320px;
-        width: 100vw;
-
-        --app-header-background-front-layer: {
-          opacity: 0;
-        };
-      }/*
-/*
-      .Header.home.background-loaded {
-        --app-header-background-front-layer: {
-          background-image: url('../../images/background.jpg');
-          background-position: center top;
-          background-size: cover;
-          height: 100%;
-          transition: opacity 0.5s;
-          opacity: 1;
-        };
-      }
-
-      .Header.home.background-loaded.remove-transition {
-        --app-header-background-front-layer: {
-          background-image: url('../../images/background.jpg');
-          background-position: center top;
-          background-size: cover;
-          height: 100%;
-          opacity: 1;
-        };
-      }
-*/
       
       .Header-actionButton {
         --paper-icon-button-ink-color: var(--text-primary-color);
@@ -253,7 +220,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                           disabled="[[app.isOffline]]" raised>{{localize('sign-in')}}</paper-button>
           </a>
 
-          <div hidden$="[[!app.isSignedIn]]">[[app.userProfile.displayName]]</div>
+          <div hidden$="[[!app.isSignedIn]]">
+            <a href="{{app.baseUrl}}contact" tabindex="-1">
+              <paper-icon-button class="avatar" id="avatarToolbar" icon="face" >      
+              </paper-icon-button>
+            </a>
+          </div>
 
         </app-toolbar>
 
@@ -267,6 +239,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!-- Two-way bind `_isDrawerOpened` since app-drawer can update `opened` itself. -->
     <app-shell-drawer opened="{{_isDrawerOpened}}" page=[[page]] app=[[app]]
                       hidden$="{{!_isDrawerLoaded}}"></app-shell-drawer>
+    
 
   </template>
 
@@ -356,11 +329,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _computePageTitle: function(page, title) {
         window.document.title = title + ' - ' + this.app.name;
-        return page === 'home' ? '' : title;
+        return page === 'home' ? '' : (page === 'contact-us')? 'Dashboard':title;
       },
 
       _computeSignInButtonHidden: function(isLazyLoadComplete, isOffline, isSignedIn, page) {
-        return !(page === 'about-us' || page === 'contact-us' || page === 'home') ||
+        return !(page === 'about-us' || page === 'contact' || page === 'home') ||
                isOffline || isSignedIn || !isLazyLoadComplete;
       },
 

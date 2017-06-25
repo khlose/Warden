@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../app-behaviors/app-localize-behavior.html">
 <link rel="import" href="app-icons-drawer.html">
@@ -113,6 +114,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .u-spacer {
         @apply(--layout-flex);
       }
+      #icon-header{
+        width: 30%;
+        height: 30%;
+      }
 
     </style>
 
@@ -121,7 +126,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div>
           <div class="Drawer-header">
-            <iron-icon class="Drawer-headerLogo" icon="header:avatar"></iron-icon>
+            <iron-icon id="icon-header" class="Drawer-headerLogo" icon="header:taxi"></iron-icon>
           </div>
         </div>
 
@@ -144,8 +149,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
 
             <a class="Navigation-link" name="contact-us" href="/contact-us">
-              <iron-icon class="Navigation-icon" icon="drawer:mail"></iron-icon>
-              <span class="Navigation-text">{{localize('contact-us')}}</span>
+              <iron-icon class="Navigation-icon" icon="dashboard"></iron-icon>
+              <span class="Navigation-text">{{localize('dashboard')}}</span>
             </a>
 
           </iron-selector>
@@ -158,7 +163,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             {{localize('made-with')}}
             <iron-icon class="Drawer-footerIcon" icon="drawer:love"></iron-icon>
             {{localize('by')}}
-            StartPolymer
+            The Warden
           </a>
         </div>
 
